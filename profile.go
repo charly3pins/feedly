@@ -91,21 +91,21 @@ func (c Client) GetProfile() (ProfileResponse, error) {
 // UpdateProfileRequest encapsulates the request payload for the UpdateProfile endpoint
 type UpdateProfileRequest struct {
 	// Email Optional string
-	Email string
+	Email string `json:"email,omitempty"`
 	// GivenName Optional string
-	GivenName string
+	GivenName string `json:"givenName,omitempty"`
 	// FamilyName Optional string
-	FamilyName string
+	FamilyName string `json:"familyName,omitempty"`
 	// Picture Optional string
-	Picture string
+	Picture string `json:"picture,omitempty"`
 	//Gender Optional boolean
-	Gender bool
+	Gender bool `json:"gender,omitempty"`
 	// Locale Optional string
-	Locale string
+	Locale string `json:"locale,omitempty"`
 	// Twitter Optional string twitter handle. example: edwk
-	Twitter string
+	Twitter string `json:"twitter,omitempty"`
 	// Facebook Optional string facebook id
-	Facebook string
+	Facebook string `json:"facebook,omitempty"`
 }
 
 // UpdateProfile updates the profile with the data given in the request

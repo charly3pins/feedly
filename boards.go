@@ -112,8 +112,8 @@ func (c Client) UpdateBoard(u UpdateBoardRequest) error {
 	return nil
 }
 
-// UploadCoverImage uploads a new cover image into an existing board.
-func (c Client) UploadCoverImage(id string, coverImage io.Reader) error {
+// UploadBoardCoverImage uploads a new cover image into an existing board.
+func (c Client) UploadBoardCoverImage(id string, coverImage io.Reader) error {
 	url := c.Config.BaseURL + "/" + c.Config.Version + "/" + boardsEndpoint + "/" + id
 
 	mpm, err := newMultiPartMIME(coverImage)

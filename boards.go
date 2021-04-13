@@ -13,8 +13,8 @@ import (
 
 const boardsEndpoint = "boards"
 
-// BoardResponse stores the response for the boards endpoints
-type BoardResponse struct {
+// Board stores the board data
+type Board struct {
 	//ID String the board id.
 	ID string `json:"id"`
 	// Created Timestamp the EPOCH timestamp when this board was created.
@@ -41,9 +41,9 @@ type BoardResponse struct {
 	StreamID string `json:"streamId,omitempty"`
 }
 
-// ListBoards returns a list of boards. If withEnterprise is true, it return enterprise boards
+// ListBoards returns a list of boards. If withEnterprise is true, it returns enterprise boards
 // followed by the user as well as personal ones.
-func (c Client) ListBoards(withEnterprise bool) ([]BoardResponse, error) {
+func (c Client) ListBoards(withEnterprise bool) ([]Board, error) {
 	url := c.Config.BaseURL + "/" + c.Config.Version + "/" + boardsEndpoint
 	if withEnterprise {
 		url += "&withEnterprise=true"
@@ -63,7 +63,7 @@ func (c Client) ListBoards(withEnterprise bool) ([]BoardResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	var boards []BoardResponse
+	var boards []Board
 	err = json.Unmarshal(body, &boards)
 	if err != nil {
 		return nil, err

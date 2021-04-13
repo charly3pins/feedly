@@ -9,8 +9,8 @@ import (
 
 const profileEndpoint = "profile"
 
-// ProfileResponse stores the response for the profile endpoints
-type ProfileResponse struct {
+// Profile stores the profile data
+type Profile struct {
 	//ID string the unique, immutable user id.
 	ID string `json:"id"`
 	// Email Optional string the email address extracted from the OAuth profile. Not always available, depending on the OAuth method used.
@@ -63,29 +63,29 @@ type ProfileResponse struct {
 }
 
 // GetProfile returns the profile of the logged user from the Access Token
-func (c Client) GetProfile() (ProfileResponse, error) {
+func (c Client) GetProfile() (Profile, error) {
 	url := c.Config.BaseURL + "/" + c.Config.Version + "/" + profileEndpoint
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return ProfileResponse{}, err
+		return Profile{}, err
 	}
 	req.Header.Add("Authorization", "Bearer "+c.Config.Token)
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		return ProfileResponse{}, err
+		return Profile{}, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return ProfileResponse{}, err
+		return Profile{}, err
 	}
-	var pResponse ProfileResponse
-	err = json.Unmarshal(body, &pResponse)
+	var p Profile
+	err = json.Unmarshal(body, &p)
 	if err != nil {
-		return ProfileResponse{}, err
+		return Profile{}, err
 	}
-	return pResponse, nil
+	return p, nil
 }
 
 // UpdateProfileRequest encapsulates the request payload for the UpdateProfile endpoint
@@ -109,31 +109,31 @@ type UpdateProfileRequest struct {
 }
 
 // UpdateProfile updates the profile with the data given in the request
-func (c Client) UpdateProfile(u UpdateProfileRequest) (ProfileResponse, error) {
+func (c Client) UpdateProfile(u UpdateProfileRequest) (Profile, error) {
 	url := c.Config.BaseURL + "/" + c.Config.Version + "/" + profileEndpoint
 	payload, err := json.Marshal(u)
 	if err != nil {
-		return ProfileResponse{}, err
+		return Profile{}, err
 	}
 	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))
 	if err != nil {
-		return ProfileResponse{}, err
+		return Profile{}, err
 	}
 	req.Header.Add("Authorization", "Bearer "+c.Config.Token)
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		return ProfileResponse{}, err
+		return Profile{}, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return ProfileResponse{}, err
+		return Profile{}, err
 	}
-	var pResponse ProfileResponse
-	err = json.Unmarshal(body, &pResponse)
+	var p Profile
+	err = json.Unmarshal(body, &p)
 	if err != nil {
-		return ProfileResponse{}, err
+		return Profile{}, err
 	}
-	return pResponse, nil
+	return p, nil
 }

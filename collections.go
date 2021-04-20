@@ -265,7 +265,7 @@ func (c Client) DeleteFeedFromCollection(collectionID, feedID string) ([]Feed, e
 	return feeds, nil
 }
 
-// DeleteMultipleFeedRequest encapsulates the request payload for the DeleteMultipleFeedFromCollection method.
+// DeleteFeedRequest encapsulates the request payload for the DeleteMultipleFeedFromCollection method.
 type DeleteFeedRequest struct {
 	// ID String the feed id.
 	ID string `json:"id"`

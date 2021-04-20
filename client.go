@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// ClientConfig
+// ClientConfig stores the configuration for the Client
 type ClientConfig struct {
 	BaseURL string
 	Version string

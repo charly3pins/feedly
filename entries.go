@@ -1,5 +1,13 @@
 package feedly
 
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"net/http"
+)
+
 const entriesEndpoint = "entries"
 
 // Content stores the content data
@@ -88,4 +96,117 @@ type Entry struct {
 	SID string `json:"sid,omitempty"`
 	// Priorities Optional priority object array a list of priority filters that match this entry (pro+ and team only).
 	Priorities []Priority `json:"priorities,omitempty"`
+}
+
+// GetEntry returns the content of an entry
+func (c Client) GetEntry(id string) (Entry, error) {
+	var entry Entry
+	url := c.Config.BaseURL + "/" + c.Config.Version + "/" + entriesEndpoint + "/" + id
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return entry, err
+	}
+	req.Header.Add("Authorization", "Bearer "+c.Config.Token)
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return entry, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return entry, err
+	}
+	err = json.Unmarshal(body, &entry)
+	if err != nil {
+		return entry, err
+	}
+	return entry, nil
+}
+
+// ListEntries returns the content for a dynamic list of entries.
+// The number of entry ids you can pass as an input is limited to 1,000.
+func (c Client) ListEntries(ids []string) ([]Entry, error) {
+	if len(ids) > 1000 {
+		return nil, errors.New("The number of entry ids you can pass as an input is limited to 1,000.")
+	}
+	url := c.Config.BaseURL + "/" + c.Config.Version + "/" + entriesEndpoint + "/.mget"
+	payload, err := json.Marshal(ids)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", "Bearer "+c.Config.Token)
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var entries []Entry
+	err = json.Unmarshal(body, &entries)
+	if err != nil {
+		return nil, err
+	}
+	return entries, nil
+}
+
+// CreateEntryRequest encapsulates the request payload for the CreateEntry method
+type CreateEntryRequest struct {
+	// Title string the article’s title. This string does not contain any HTML markup.
+	Title string `json:"title"`
+	// Content Optional content object the article content. This object typically has two values: “content” for the content itself, and “direction” (“ltr” for left-to-right, “rtl” for right-to-left). The content itself contains sanitized HTML markup.
+	Content Content `json:"content,omitempty"`
+	// Summary Optional content object the article summary. See the content object above.
+	Summary Content `json:"summary,omitempty"`
+	// Author Optional string the author’s name
+	Author string `json:"author,omitempty"`
+	// Alternate Optional link object array a list of alternate links for this article. Each link object contains a media type and a URL. Typically, a single object is present, with a link to the original web page.
+	Alternate []Link `json:"alternate,omitempty"`
+	// Origin Optional origin object the feed from which this article was crawled. If present, “streamId” will contain the feed id, “title” will contain the feed title, and “htmlUrl” will contain the feed’s website.
+	Origin Origin `json:"origin,omitempty"`
+	// Published Optional timestamp the timestamp, in ms, when this article was published, as reported by the RSS feed (often inaccurate).
+	Published Time `json:"published,omitempty"`
+	// Keywords Optional string array a list of keyword strings extracted from the RSS entry.
+	Keywords []string `json:"keywords,omitempty"`
+	// Tags Optional tag object array a list of tag objects (“id” and “label”) that the user added to this entry. This value is only returned if an Authorization header is provided, and at least one tag has been added. If the entry has been explicitly marked as read (not the feed itself), the “global.read” tag will be present.
+	Tags []Tag `json:"tags,omitempty"`
+}
+
+// CreateEntry injects an entry into a user’s account.
+// The entries created will only be available through the tag streams of the respective tags passed.
+func (c Client) CreateEntry(cer CreateEntryRequest) (Entry, error) {
+	var entry Entry
+	url := c.Config.BaseURL + "/" + c.Config.Version + "/" + entriesEndpoint
+	payload, err := json.Marshal(cer)
+	if err != nil {
+		return entry, err
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))
+	if err != nil {
+		return entry, err
+	}
+	req.Header.Add("Authorization", "Bearer "+c.Config.Token)
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return entry, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return entry, err
+	}
+	err = json.Unmarshal(body, &entry)
+	if err != nil {
+		return entry, err
+	}
+	return entry, nil
 }
